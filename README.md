@@ -1,5 +1,7 @@
 # memory-os
 
+English | [繁體中文](README.zh-TW.md)
+
 Three small, independent pieces that give a Claude Code assistant a long-term memory without a database server:
 
 1. **notes/** -- a *write-time* observation-note generator. Every night it turns the previous day's chat logs into a dense, dated, speaker-tagged note file using a small LLM (Claude Haiku by default).
@@ -9,6 +11,38 @@ Three small, independent pieces that give a Claude Code assistant a long-term me
 Extracted from a personal memory system. The memory *cards themselves* are not included, only the format.
 
 > Status: draft v1, extracted by hand from a private codebase. See "Limitations and known issues" before relying on it.
+
+## Benchmark: LongMemEval, all 500 questions
+
+We ran the full [LongMemEval](https://github.com/xiaowu0162/LongMemEval) set (`longmemeval_s_cleaned`, 500 questions, about 50 chat sessions of history per question) on 2026-10-10 with the write-time-notes idea that `notes/` is built on: a small model writes dated observation notes first, and the answering model reads only those notes, with no retrieval at question time.
+
+| Question type | Correct | Score |
+|---|---|---|
+| knowledge-update | 75 / 78 | 96.2% |
+| multi-session | 120 / 133 | 90.2% |
+| single-session-assistant | 54 / 56 | 96.4% |
+| single-session-preference | 30 / 30 | 100% |
+| single-session-user | 68 / 70 | 97.1% |
+| temporal-reasoning | 128 / 133 | 96.2% |
+| **Overall** | **475 / 500** | **95.0%** |
+| Average of the six types | | 96.0% |
+
+Setup: Claude Haiku 5.5 writes the notes (each question's history sorted by date, about 40,000 characters per batch); Claude Sonnet 5.5 (effort medium) answers from the notes alone; grading uses the official LongMemEval prompt with `gpt-4o-2024-08-06`. Abstention questions: 27 of 30 correctly declined.
+
+For comparison, on the same 500 questions with the same answering model and grader:
+
+| Approach | Overall | Six-type average |
+|---|---|---|
+| Vector search, top 5 sessions into the prompt | 88.2% | 90.7% |
+| Tuned hybrid search with qmd, the engine under `search/` (BM25 + vector + reranking, top 10, date anchoring, two answer rules) | 92.2% | 93.2% |
+| **Write-time observation notes (this approach)** | **95.0%** | **96.0%** |
+| Mastra Observational Memory, published, `gpt-5-mini` ([source](https://mastra.ai/research/observational-memory)) | 93.6% | 94.9% |
+
+How much to trust it:
+
+* **One run.** Changing a single note-writing rule moved a 99-question subset by 3 answers, so run-to-run noise is a few questions. The lead over Mastra's published number (7 questions overall) is at the edge of that noise; the multi-session gain (120 vs 116) is the most solid part.
+* **Not the same answering model as Mastra's** (Claude Sonnet 5.5 vs `gpt-5-mini`), so read the Mastra row as a reference point, not a head-to-head.
+* **The benchmark harness is not in this repo.** It used its own observer prompt and batching tuned for LongMemEval. `notes/` here is the nightly generator for real chat logs and follows the same idea, but it is not the exact script that produced these numbers.
 
 ## How the pieces fit
 
@@ -162,7 +196,7 @@ The fact or rule, stated plainly.
 
 ## Evidence, and how much to trust it
 
-In one person's small pilot (30 questions about one week of private chat logs), searching raw logs directly answered 2 of 30; reading nightly observation notes answered 28 of 30; notes plus raw search also 28. That is one person, one week, hand-graded, and the corpus is not included. Treat it as motivation for the write-time-notes idea, not as a benchmark.
+In one person's small pilot (30 questions about one week of private chat logs), searching raw logs directly answered 2 of 30; reading nightly observation notes answered 28 of 30; notes plus raw search also 28. That is one person, one week, hand-graded, and the corpus is not included. Treat it as motivation for the write-time-notes idea, not as a benchmark. For a public benchmark, see the LongMemEval section above.
 
 ## Limitations and known issues
 
@@ -181,16 +215,4 @@ MIT, see `LICENSE`.
 
 ---
 
-## 繁體中文摘要
-
-memory-os 把一套個人用的「記憶系統」中三件可獨立使用的部分抽出來：
-
-1. **notes/**：寫入時整理觀察筆記。每晚把前一天的對話（先遮罩密碼與金鑰）交給 Claude Haiku，產出帶時間、發言者、優先級（紅黃綠）的每日筆記。這是唯一會花錢、會連外網的一段，有 `--max-usd` 花費上限（每次呼叫 API 前檢查累計花費，最多超出一次呼叫的金額，超過即停並以代碼 4 結束）與 `state/api-spend.tsv` 記帳。
-2. **recall/**：每輪自動召回 hook（`UserPromptSubmit`）。用字元 n-gram 比對 skill 描述與記憶卡，只有高信心才注入「相關卡片／技能」，上限約 800 token；不連網、不用模型，任何錯誤一律靜默放行。
-3. **search/**：qmd 檢索設定與 MCP 外掛（BM25＋向量＋別名擴展，RRF 融合、時間衰減）。向量模型預設 EmbeddingGemma，Qwen3-Embedding 列為可選，兩者不能混用，換模型要重建索引。注意 qmd 的 `index.yml` 裡 `models.embed` 優先於環境變數 `QMD_EMBED_MODEL`，若兩者與 `qmd-embed-model` 檔不一致，檔案會被靜默忽略；`install.sh` 會警告。`QMD_MEMORY_DECAY` 不控制記憶集合的時間衰減（該衰減永遠開啟），只影響知識結果同分時的排序。
-
-安裝：`bash install.sh --check` 只檢查並跑離線自測；`bash install.sh` 建立 `$MEMORY_OS_HOME`（預設 `~/.memory-os`）目錄並印出要手動加進 Claude Code settings 的 hook JSON，不會改你的既有設定。API 金鑰由環境變數、金鑰檔、或 macOS `security` 項目（名稱用環境變數設定）取得。
-
-記憶卡格式：一張卡一個 Markdown 檔，frontmatter 有 `name`、`description`、`metadata.type`，內文寫事實加「Why／How to apply」；`MEMORY.md` 只當薄索引（族名加標題），靠 recall 或 grep 找卡，不整份載入。
-
-限制：這是草稿；召回門檻是針對繁體中文與作者自己的卡片校準的，英文提示會誤中常見詞；`search/` 的排序規則寫死了作者的收藏集合命名；筆記產生器在資料很密的日子會撞 `max_tokens` 被截斷；API 路徑只用本機 mock 伺服器測過，沒有實際呼叫。
+完整的繁體中文說明（含跑分）請看 [README.zh-TW.md](README.zh-TW.md)。
