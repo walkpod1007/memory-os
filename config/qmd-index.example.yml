@@ -1,0 +1,19 @@
+# Example qmd collections for ~/.config/qmd/index.yml (merge by hand; do not overwrite an existing file).
+# Replace /path/to/memory-os-home with your $MEMORY_OS_HOME (qmd does not expand env vars).
+collections:
+  notes:
+    path: /path/to/memory-os-home/notes
+    pattern: "**/*.md"
+  cards:
+    path: /path/to/memory-os-home/cards
+    pattern: "**/*.md"
+  # Optional: your own knowledge base / vault. rank-core.ts expects the collection name "vault"
+  # for its path-based weights; rename the patterns in rank-core.ts if you use other names.
+  vault:
+    path: /path/to/your/vault
+    pattern: "**/*.md"
+models:
+  # embed: pick ONE; keep it identical to config/qmd-embed-model (search-pipeline.ts reads that file at every query).
+  embed: hf:ggml-org/embeddinggemma-300M-GGUF/embeddinggemma-300M-Q8_0.gguf
+  # embed: hf:Qwen/Qwen3-Embedding-0.6B-GGUF/Qwen3-Embedding-0.6B-Q8_0.gguf
+  # generate / rerank: qmd ships defaults; override only if you know why.

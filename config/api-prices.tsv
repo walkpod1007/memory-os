@@ -1,0 +1,4 @@
+# model	input	output	cache_read	cache_write  (USD per million tokens; check the provider's price page and edit before relying on the spend log)
+model	input	output	cache_read	cache_write
+claude-haiku-5-5	0.10	0.50	0.01	0.125
+claude-sonnet-5-5	2.00	10.00	0.20	2.50

@@ -1,0 +1,5 @@
+# One model URI per file; the first non-comment line wins. Copied to $MEMORY_OS_HOME/qmd-embed-model by install.sh.
+# Default: EmbeddingGemma (Google, GGUF). Verify the exact repo/file name on Hugging Face before first use.
+hf:ggml-org/embeddinggemma-300M-GGUF/embeddinggemma-300M-Q8_0.gguf
+# Optional alternative (Alibaba Qwen3-Embedding). Fine for embeddings; see README note on model choice.
+# hf:Qwen/Qwen3-Embedding-0.6B-GGUF/Qwen3-Embedding-0.6B-Q8_0.gguf

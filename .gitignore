@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.bak
+*.bak-*
+node_modules/
+.DS_Store
+# runtime data lives outside the repo ($MEMORY_OS_HOME), but guard against accidents:
+chats/
+state/
+notes-out/
+redact-denylist.txt
