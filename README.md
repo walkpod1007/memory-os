@@ -59,6 +59,12 @@ cards/*.md  + cards/MEMORY.md  + skills/*/SKILL.md + skill-routes.md            
 * The recall hook never reads `notes/`. It reads memory *cards* (hand-written or agent-written short files) and skill descriptions.
 * The search server reads whatever qmd collections you configure.
 
+## Companion repo: lifeos-memory
+
+memory-os is the "remembers things" layer. The "session survives" layer lives in [lifeos-memory](https://github.com/walkpod1007/lifeos-memory): a token watchdog that writes a handoff file and respawns a fresh session before the context limit, a session launcher (`claw`), and the flow for writing a pitfall card on the spot when a mistake happens. Nothing here does those three things.
+
+If you install both, skip lifeos-memory's `realtime-summary` (10-minute summaries) and `memory-recall-hook`; `notes/` and `recall/` here replace them. Running both sets injects context twice.
+
 ## Requirements
 
 | Piece | Needs |
@@ -208,6 +214,7 @@ In one person's small pilot (30 questions about one week of private chat logs), 
 * **Not included on purpose:** the alias-table generator that produces `aliases.json` (alias expansion stays effectively off until you provide that file), a second incremental notes pipeline for coding-assistant transcripts, all real memory cards, notes and logs.
 * **Tests:** `python3 tests/test_redact.py` and `python3 tests/test_max_usd.py` run offline (the latter against a local mock server); `bash install.sh --check` runs both.
 * The default API model id and the price table are examples; check current model names and prices yourself.
+* **No handoff, no watchdog, no pitfall-card flow.** Surviving a context-limit restart and writing a card when a mistake happens are handled by the companion repo [lifeos-memory](https://github.com/walkpod1007/lifeos-memory), not here.
 
 ## License
 

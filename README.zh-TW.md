@@ -59,6 +59,12 @@ cards/*.md  + cards/MEMORY.md  + skills/*/SKILL.md + skill-routes.md            
 * 召回 hook 從不讀 `notes/`。它讀的是記憶卡（手寫或由 agent 寫的短檔）與技能描述。
 * 搜尋伺服器讀的是你設定的 qmd 集合（collection），設了哪些就讀哪些。
 
+## 配套 repo：lifeos-memory
+
+memory-os 是「記得住」那層。「session 活下來」那層在 [lifeos-memory](https://github.com/walkpod1007/lifeos-memory)：token 快撞限時先寫交接檔再重生新 session 的看門狗、session 啟動器（`claw`）、犯錯當場落一張踩坑卡的流程。這裡沒有這三件事。
+
+兩個都裝的話，跳過 lifeos-memory 的 `realtime-summary`（10 分鐘摘要）與 `memory-recall-hook`；這裡的 `notes/` 與 `recall/` 取代它們。兩套都跑會把脈絡注入兩次。
+
 ## 需求
 
 | 部分 | 需求 |
@@ -208,6 +214,7 @@ metadata:
 * **刻意不包含的東西**：產生 `aliases.json` 的別名表產生器（在你自備那個檔案之前，別名擴展實際上是關閉的）、給寫程式助理的對話紀錄用的第二條增量式筆記管線、所有真實的記憶卡、筆記與紀錄。
 * **測試**：`python3 tests/test_redact.py` 與 `python3 tests/test_max_usd.py` 都可以離線執行（後者是對本機的模擬伺服器）；`bash install.sh --check` 兩個都會跑。
 * 預設的 API 模型 ID 與價格表只是範例；目前的模型名稱與價格請自行確認。
+* **沒有交接、沒有看門狗、沒有踩坑卡流程。** 撞到 context 上限時的重生交接、犯錯當場落卡，都在配套 repo [lifeos-memory](https://github.com/walkpod1007/lifeos-memory)，不在這裡。
 
 ## 授權
 
